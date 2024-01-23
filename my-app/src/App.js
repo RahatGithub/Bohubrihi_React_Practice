@@ -16,14 +16,42 @@ class App extends Component {
       { customerName: "Moinuddin Babor", purchasedFrom: "T&C shoes" },
       { customerName: "Rouf Mawla", purchasedFrom: "Motin & Sons" },
       { customerName: "Mahmud Rabbi", purchasedFrom: "FastCharge" },
-      { customerName: "Shahin Haydar", purchasedFrom: "T&C shoes" }
+      { customerName: "Shahin Haydar", purchasedFrom: "T&C shoes" },
+      { customerName: "Azad Shafiq", purchasedFrom: "Motin & Sons" },
+      { customerName: "Rouf Mawla", purchasedFrom: "FastCharge" },
+      { customerName: "Azad Shafiq", purchasedFrom: "FastCharge" },
     ],
-    shouldShow: true
+    showShops: true,
+    showCustomers: true
   };
 
-  toggleShop = () => {
-    this.setState({ shouldShow: !this.state.shouldShow });
+  deleteShop = index => {
+    const shops = [...this.state.shops];
+    shops.splice(index, 1);
+    this.setState({
+      shops: shops
+    })
+  };
+
+  deleteCustomer = index => {
+    const customers = [...this.state.customers];
+    customers.splice(index, 1);
+    this.setState({
+      customers: customers
+    })
   }
+
+  toggleShop = () => {
+    this.setState({
+      showShops: !this.state.showShops
+    });
+  };
+
+  toggleCustomer = () => {
+    this.setState({
+      showCustomers: !this.state.showCustomers
+    });
+  };
 
   render() {
 
@@ -33,15 +61,43 @@ class App extends Component {
           shopName={shop.shopName}
           location={shop.location}
           type={shop.type}
+          customers={this.state.customers.filter(customer => customer.purchasedFrom === shop.shopName)}
+          delete={() => this.deleteShop(index)}
         />
       );
     });
 
-    const customers = this.state.customers.map((customer, index) => {
+    let uniqueCustomerNames = [];
+    this.state.customers.forEach((customer, index) => {
+      if (!uniqueCustomerNames.includes(customer.customerName)) {
+        uniqueCustomerNames.push(customer.customerName)
+      }
+    });
+
+    let uniqueCustomers = [];
+    let aCustomer = new Object();
+    uniqueCustomerNames.forEach((customerName, index) => {
+      let shops = [];
+      this.state.customers.forEach((customer, index) => {
+        if (customer.customerName === customerName) {
+          shops.push(customer.purchasedFrom);
+        }
+      });
+      aCustomer = {
+        customerName: customerName,
+        shops: shops
+      }
+      uniqueCustomers.push(aCustomer);
+    })
+
+    // console.log(uniqueCustomers)
+
+    const customers = uniqueCustomers.map((customer, index) => {
       return (
         <Customer
           customerName={customer.customerName}
-          purchasedFrom={customer.purchasedFrom}
+          shops={customer.shops}
+          delete={() => this.deleteCustomer(index)}
         />
       );
     });
@@ -49,12 +105,14 @@ class App extends Component {
     return (
       <div className="App">
         <h1>Our shops</h1>
+        <button onClick={this.toggleShop}>Toggle shops</button>
         <div className='shops'>
-          {shops}
+          {this.state.showShops ? shops : null}
         </div>
         <h1>Our customers</h1>
+        <button onClick={this.toggleCustomer}>Toggle customers</button>
         <div className='customers'>
-          {customers}
+          {this.state.showCustomers ? customers : null}
         </div>
       </div>
     )
